@@ -360,12 +360,15 @@ func (s *server) fetchInventoryFromNode(ctx context.Context, node string) (inven
 		// Get the IP address of the VM
 		addrs, err := s.fetchQEMUAddrs(ctx, node, vm.VMID)
 		if err != nil {
-			return inventory, stats, fmt.Errorf("fetching IP addresses for VM %q on %q: %w", vm.VMID, node, err)
+			return inventory, stats, fmt.Errorf("fetching IP addresses for VM %d on %q: %w", vm.VMID, node, err)
 		}
 		logger.Debug("fetched IP addresses for VM", "vm", vm.Name, "addrs", addrs)
-
+		var hostName = vm.Name
+		if strings.Index(vm.Name, ".") != -1 {
+			hostName = vm.Name[0:strings.Index(vm.Name, ".")];
+		}
 		inventory.Resources = append(inventory.Resources, pveInventoryItem{
-			Name:  vm.Name,
+			Name:  hostName,
 			ID:    vm.VMID,
 			Node:  node,
 			Type:  pveItemTypeQEMU,
@@ -395,8 +398,12 @@ func (s *server) fetchInventoryFromNode(ctx context.Context, node string) (inven
 		}
 		logger.Debug("fetched IP addresses for LXC", "lxc", lxc.Name, "addrs", addrs)
 
+		var hostName = lxc.Name
+		if strings.Index(lxc.Name, ".") != -1 {
+			hostName = lxc.Name[0:strings.Index(lxc.Name, ".")];
+		}
 		inventory.Resources = append(inventory.Resources, pveInventoryItem{
-			Name:  lxc.Name,
+			Name:  hostName,
 			ID:    lxc.VMID,
 			Node:  node,
 			Type:  pveItemTypeLXC,
@@ -421,7 +428,7 @@ func (s *server) fetchQEMUAddrs(ctx context.Context, node string, vmID int) ([]n
 	// Start by seeing if we can find a static IP address in the QEMU config.
 	conf, err := s.client.GetQEMUConfig(ctx, node, vmID)
 	if err != nil {
-		return nil, fmt.Errorf("fetching QEMU config for %q on %q: %w", vmID, node, err)
+		return nil, fmt.Errorf("fetching QEMU config for %d on %q: %w", vmID, node, err)
 	}
 
 	// The ipconfig0 field is a comma-separated list of key-value pairs,
@@ -459,7 +466,7 @@ func (s *server) fetchQEMUAddrs(ctx context.Context, node string, vmID int) ([]n
 	// Otherwise, fetch and return all non-localhost IP addresses from the QEMU guest, if any.
 	interfaces, err := s.client.GetQEMUInterfaces(ctx, node, vmID)
 	if err != nil {
-		return nil, fmt.Errorf("fetching QEMU guest interfaces for %q on %q: %w", vmID, node, err)
+		//return nil, fmt.Errorf("fetching QEMU guest interfaces for %d on %q: %w", vmID, node, err)
 	}
 	logger.Debug("fetched QEMU guest interfaces", "num_interfaces", len(interfaces.Result))
 
@@ -495,7 +502,7 @@ func (s *server) fetchLXCAddrs(ctx context.Context, node string, vmID int) ([]ne
 	// Fetch the LXC guest config to see if we can find a static IP address.
 	conf, err := s.client.GetLXCConfig(ctx, node, vmID)
 	if err != nil {
-		return nil, fmt.Errorf("fetching LXC config for %q on %q: %w", vmID, node, err)
+		return nil, fmt.Errorf("fetching LXC config for %d on %q: %w", vmID, node, err)
 	}
 	logger.Debug("fetched LXC config", "config", conf)
 
@@ -538,7 +545,7 @@ func (s *server) fetchLXCAddrs(ctx context.Context, node string, vmID int) ([]ne
 	// Fetch and return all non-localhost IP addresses from the LXC guest, if any.
 	interfaces, err := s.client.GetLXCInterfaces(ctx, node, vmID)
 	if err != nil {
-		return nil, fmt.Errorf("fetching LXC guest interfaces for %q on %q: %w", vmID, node, err)
+		return nil, fmt.Errorf("fetching LXC guest interfaces for %d on %q: %w", vmID, node, err)
 	}
 	logger.Debug("fetched LXC guest interfaces", "num_interfaces", len(interfaces))
 

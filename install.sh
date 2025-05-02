@@ -52,4 +52,5 @@ sudo install --owner=root --group=root --mode=644 \
 #5. start Service
 
 sudo systemctl daemon-reload
+sudo systemctl restart systemd-resolved.service
 sudo systemctl restart ns-prox.service

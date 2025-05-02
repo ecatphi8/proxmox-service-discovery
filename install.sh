@@ -1,7 +1,7 @@
 #!/bon/bash
 
 #1  Compile
-
+go build
 #2. Copy binary to /usr/local/bin
 sudo install --owner=root --group=root --mode=755 \
              ./proxmox-service-discorvery \

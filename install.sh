@@ -47,7 +47,7 @@ DNS=172.19.1.3 172.19.1.4
 DNSStubListener=no
 EOF
 sudo install --owner=root --group=root --mode=644 \
-             /tmp/ns-prox.service \
+             /tmp/resolved.conf \
              /etc/systemd/resolved.conf.d/
 
 #5. start Service

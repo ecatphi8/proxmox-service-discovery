@@ -130,7 +130,14 @@ sudo systemctl start proxmox-service-discovery
 
 ## Client/DNS Server Setup
 
-TODO: more details here
+Edit your /etc/systemd/resolved.conf and add
+
+```bash
+DNS=8.8.8.8 # or ip address of your internal DNS Server
+DNSStubListener=no
+```
+
+
 
 ## API Token Creation
 

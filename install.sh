@@ -1,0 +1,45 @@
+#!/bon/bash
+
+#1  Compile
+
+#2. Copy binary to /usr/local/bin
+sudo install --owner=root --group=root --mode=755 \
+             ./proxmox-service-discorvery \
+             /usr/local/bin/ns-prox
+             
+#3. Copy env to /usr/local/etc
+# Expect ns-prox.env to be present in .ssh dorectory
+sudo install --owner=root --group=root --mode=644 \
+             $HOME/.ssh/ns-prox.env \
+             /usr/local/etc/ns-prox.env
+#4. Copy systemd unit to /etc/systemd/system
+cat <<'EOF' >/tmp/ns-prox.service 
+[Unit]
+Description=Proxmox Service Discovery
+After=network.target
+
+[Service]
+EnvironmentFile=/usr/local/etc/ns-prox.env
+ExecStart=/usr/local/bin/ns-prox \
+  --proxmox-host=${PROXMOX_NODE} \
+  --proxmox-user=${PROXMOX_USER} \
+  --proxmox-token-id=${PROXMOX_TOKEN_ID} \
+  --proxmox-token-secret=${PROXMOX_TOKEN_SECRET} \
+  --addr=:53 \
+  --debug-addr=:8080 \
+  --dns-zone=${DOMAIN}
+Restart=on-failure
+User=nobody
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo install --owner=root --group=root --mode=644 \
+             /tmp/ns-prox.service \
+             /etc/systemd/system/ns-prox.service
+#5. start Service
+
+sudo systemctl daemon-reload
+sudo systemctl restart ns-prox.service

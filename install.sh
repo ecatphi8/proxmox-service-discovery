@@ -4,7 +4,7 @@
 go build
 #2. Copy binary to /usr/local/bin
 sudo install --owner=root --group=root --mode=755 \
-             ./proxmox-service-discorvery \
+             ./proxmox-service-discovery \
              /usr/local/bin/ns-prox
              
 #3. Copy env to /usr/local/etc

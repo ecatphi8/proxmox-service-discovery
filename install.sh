@@ -39,6 +39,16 @@ EOF
 sudo install --owner=root --group=root --mode=644 \
              /tmp/ns-prox.service \
              /etc/systemd/system/ns-prox.service
+
+#5. Configure system resolver
+cat <<'EOF' >/tmp/resolved.conf 
+DNS=172.19.1.3 172.19.1.4
+DNSStubListener=no
+EOF
+sudo install --owner=root --group=root --mode=644 \
+             /tmp/ns-prox.service \
+             /etc/systemd/resolved.conf.d/
+
 #5. start Service
 
 sudo systemctl daemon-reload

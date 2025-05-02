@@ -41,6 +41,7 @@ sudo install --owner=root --group=root --mode=644 \
              /etc/systemd/system/ns-prox.service
 
 #5. Configure system resolver
+sudo mkdir -p /etc/systemd/resolved.conf.d
 cat <<'EOF' >/tmp/resolved.conf 
 DNS=172.19.1.3 172.19.1.4
 DNSStubListener=no

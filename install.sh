@@ -9,9 +9,11 @@ sudo install --owner=root --group=root --mode=755 \
              
 #3. Copy env to /usr/local/etc
 # Expect ns-prox.env to be present in .ssh dorectory
+sops decrypt ./secrets/ns-prox.enc.env >/tmp/ns-prox/env
 sudo install --owner=root --group=root --mode=644 \
-             $HOME/.ssh/ns-prox.env \
+             /tmp/ns-prox.env \
              /usr/local/etc/ns-prox.env
+rm -f /tmp/ns-prox.env
 #4. Copy systemd unit to /etc/systemd/system
 cat <<'EOF' >/tmp/ns-prox.service 
 [Unit]
@@ -27,7 +29,8 @@ ExecStart=/usr/local/bin/ns-prox \
   --proxmox-token-secret=${PROXMOX_TOKEN_SECRET} \
   --addr=:53 \
   --debug-addr=:8080 \
-  --dns-zone=${DOMAIN}
+  --dns-zone=${DOMAIN} \
+  --filter-exclude-tags=nodns
 Restart=on-failure
 User=nobody
 AmbientCapabilities=CAP_NET_BIND_SERVICE

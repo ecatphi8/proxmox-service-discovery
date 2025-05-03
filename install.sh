@@ -9,7 +9,7 @@ sudo install --owner=root --group=root --mode=755 \
              
 #3. Copy env to /usr/local/etc
 # Expect ns-prox.env to be present in .ssh dorectory
-sops decrypt ./secrets/ns-prox.enc.env >/tmp/ns-prox/env
+sops decrypt ./secrets/ns-prox.enc.env >/tmp/ns-prox.env
 sudo install --owner=root --group=root --mode=644 \
              /tmp/ns-prox.env \
              /usr/local/etc/ns-prox.env

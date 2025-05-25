@@ -9,6 +9,7 @@ import (
 	"net/netip"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -430,6 +431,7 @@ func (s *server) fetchQEMUAddrs(ctx context.Context, node string, vmID int) ([]n
 	if err != nil {
 		return nil, fmt.Errorf("fetching QEMU config for %d on %q: %w", vmID, node, err)
 	}
+	var addrs []netip.Addr
 
 	// The ipconfig0 field is a comma-separated list of key-value pairs,
 	// used to pass configuration to cloud-init; see the following for more
@@ -440,7 +442,8 @@ func (s *server) fetchQEMUAddrs(ctx context.Context, node string, vmID int) ([]n
 	ipConfig := splitKVs(conf.IPConfig0)
 	if ip, ok := ipConfig["ip"]; ok {
 		if pfx, err := netip.ParsePrefix(ip); err == nil {
-			return []netip.Addr{pfx.Addr()}, nil
+			addrs = append(addrs, pfx.Addr())
+			//return []netip.Addr{pfx.Addr()}, nil
 		} else {
 			logger.Warn("parsing static IP address",
 				slog.String("address", ip),
@@ -470,7 +473,6 @@ func (s *server) fetchQEMUAddrs(ctx context.Context, node string, vmID int) ([]n
 	}
 	logger.Debug("fetched QEMU guest interfaces", "num_interfaces", len(interfaces.Result))
 
-	var addrs []netip.Addr
 	for _, iface := range interfaces.Result {
 		if iface.Name == "lo" {
 			continue
@@ -490,7 +492,10 @@ func (s *server) fetchQEMUAddrs(ctx context.Context, node string, vmID int) ([]n
 				logger.Error("parsing IP address", "address", addr.Address, pvelog.Error(err))
 				continue
 			}
-			addrs = append(addrs, ip)
+			// Only add if not present
+			if !slices.Contains(addrs,ip) {
+				addrs = append(addrs, ip)
+			}
 		}
 	}
 	return addrs, nil

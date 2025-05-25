@@ -5,8 +5,9 @@
     "version": "0.2.0",
     "configurations": [ 
         {
-            "name": "Launch file",
+            "name": "Launch Package",
             "type": "go",
+            "debugAdapter": "dlv-dap",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
@@ -18,6 +19,5 @@
             "--debug-addr=:8080",
             "--dns-zone=${env:DOMAIN}" ]
         }
-
     ]
 }
